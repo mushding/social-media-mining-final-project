@@ -3,6 +3,8 @@ from requests_html import HTML
 import urllib
 import re
 
+import csv
+
 def fetchData(url):
     '''
     Step 1. 
@@ -71,7 +73,7 @@ if __name__ == '__main__':
 
     for idx in range(prevPageIdx - pageNum, prevPageIdx + 1): # /bbs/Gossiping/index3424.html
         page_url = urllib.parse.urljoin('https://www.ptt.cc/bbs/Gossiping/', 'index' + str(idx) + ".html")
-
+        print(idx)
         # step 2. parse Data to Artical list
         resp = fetchData(page_url)
         pageHTML = HTML(html=resp)
@@ -81,6 +83,9 @@ if __name__ == '__main__':
         for entry in post_entries:
             pageData.append(parseMeta(entry))   # setp-3
 
-        print(pageData)
-
-    
+    # csv header
+    fieldnames = ['title', 'push', 'date', 'author', 'link']
+    with open('Gossiping_100.csv', 'w', encoding='UTF8', newline='') as f:
+        writer = csv.DictWriter(f, fieldnames=fieldnames)
+        writer.writeheader()
+        writer.writerows(pageData)

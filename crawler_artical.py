@@ -22,12 +22,13 @@ def parseArtical(html):
     return post_entries
 
 
-def parseMeta(entry):
+def parseMeta(entry, idx):
     '''
     Step 3.
     Get every meta in entry, and return dict
     '''
     meta = {
+        'aid': idx,
         'title': entry.find('div.title', first=True).text,
         'push': entry.find('div.nrec', first=True).text,
         'date': entry.find('div.date', first=True).text,
@@ -38,20 +39,10 @@ def parseMeta(entry):
         meta['author'] = entry.find('div.author', first=True).text
         meta['link'] = entry.find('div.title > a', first=True).attrs['href']
     except AttributeError:
-        # 但碰上文章被刪除時，就沒有辦法像原本的方法取得 作者 跟 連結
-        if '(本文已被刪除)' in meta['title']:
-            # e.g., "(本文已被刪除) [haudai]"
-            match_author = re.search('\[(\w*)\]', meta['title'])
-            if match_author:
-                meta['author'] = match_author.group(1)
-        elif re.search('已被\w*刪除', meta['title']):
-            # e.g., "(已被cappa刪除) <edisonchu> op"
-            match_author = re.search('\<(\w*)\>', meta['title'])
-            if match_author:
-                meta['author'] = match_author.group(1)
+        return 
+        
     # 最終仍回傳統一的 dict() 形式 paired data
     return meta
-
 
 if __name__ == '__main__':
     pageNum = 100
@@ -80,11 +71,11 @@ if __name__ == '__main__':
         post_entries = parseArtical(pageHTML)  # step-2
 
         # one page
-        for entry in post_entries:
-            pageData.append(parseMeta(entry))   # setp-3
+        for entry in enumerate(post_entries):
+            pageData.append(parseMeta(entry, idx))   # setp-3
 
     # csv header
-    fieldnames = ['title', 'push', 'date', 'author', 'link']
+    fieldnames = ['aid', 'title', 'push', 'date', 'author', 'link']
     with open('Gossiping_100.csv', 'w', encoding='UTF8', newline='') as f:
         writer = csv.DictWriter(f, fieldnames=fieldnames)
         writer.writeheader()

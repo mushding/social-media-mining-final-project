@@ -33,14 +33,28 @@ def parseMeta(entry, idx):
         'push': entry.find('div.nrec', first=True).text,
         'date': entry.find('div.date', first=True).text,
     }
-
+    if "(本文已被刪除)" in meta['title']:
+        print("1")
+    """
     try:
         # 正常狀況取得資料
         meta['author'] = entry.find('div.author', first=True).text
         meta['link'] = entry.find('div.title > a', first=True).attrs['href']
     except AttributeError:
+        # 但碰上文章被刪除時，就沒有辦法像原本的方法取得 作者 跟 連結
+        if '(本文已被刪除)' in meta['title']:
+            # e.g., "(本文已被刪除) [haudai]"
+            match_author = re.search('\[(\w*)\]', meta['title'])
+            if match_author:
+                meta['author'] = match_author.group(1)
+        elif re.search('已被\w*刪除', meta['title']):
+            # e.g., "(已被cappa刪除) <edisonchu> op"
+            match_author = re.search('\<(\w*)\>', meta['title'])
+            if match_author:
+                meta['author'] = match_author.group(1)
+        print("here is an error")
         return 
-        
+         """
     # 最終仍回傳統一的 dict() 形式 paired data
     return meta
 
@@ -62,7 +76,7 @@ if __name__ == '__main__':
     # get prevPage index
     prevPageIdx = int(prevPageBtn.split('/')[3].replace('index', '').split('.')[0])
 
-    for idx in range(prevPageIdx - pageNum, prevPageIdx + 1): # /bbs/Gossiping/index3424.html
+    for idx in range(prevPageIdx - pageNum + 96, prevPageIdx - 3): # /bbs/Gossiping/index3424.html
         page_url = urllib.parse.urljoin('https://www.ptt.cc/bbs/Gossiping/', 'index' + str(idx) + ".html")
         print(idx)
         # step 2. parse Data to Artical list
@@ -71,7 +85,7 @@ if __name__ == '__main__':
         post_entries = parseArtical(pageHTML)  # step-2
 
         # one page
-        for entry in enumerate(post_entries):
+        for idx, entry in enumerate(post_entries):
             pageData.append(parseMeta(entry, idx))   # setp-3
 
     # csv header

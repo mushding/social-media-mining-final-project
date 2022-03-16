@@ -1,5 +1,6 @@
 import csv
 from crawler_artical import fetchData
+import pandas as pd
 
 with open('./Gossiping_100.csv', newline='') as csvfile:
 

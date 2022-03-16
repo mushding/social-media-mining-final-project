@@ -31,9 +31,9 @@ def parseMeta(entry, aid):
     Get every meta in entry, and return dict
     '''
     if "(本文已被刪除)" in entry.select('.title')[0].text:
-        return
+        raise Exception('(本文已被刪除)')
     elif re.search("已被\w*刪除", entry.select('.title')[0].text):
-        return
+        raise Exception('已被\w*刪除')
 
     # get artical link
     link = entry.select('.title a')[0].attrs['href']
@@ -104,6 +104,7 @@ def saveToCSV(pageData, fieldnames, saveDir):
 if __name__ == "__main__":
     pageData = list()
     pageNum = 3500
+    meta = 0
 
     # Step 1. get Gossiping Data pass through over-18
     url = 'https://www.ptt.cc/bbs/Gossiping/index.html'
@@ -128,7 +129,12 @@ if __name__ == "__main__":
         post_entries = soup.select('.r-ent')
         for articleIdx, entry in enumerate(post_entries):
             aid = str(pageIdx) + str(articleIdx).zfill(2)
-            meta = parseMeta(entry, aid)
+            try:
+                meta = parseMeta(entry, aid)
+                pageData.append(meta)
+            except Exception:
+                print(Exception)
+
             # if the article is deleted, then don't save it to list
             if meta == None:
                 print("article was deleted")

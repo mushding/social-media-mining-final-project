@@ -103,7 +103,7 @@ def saveToCSV(pageData, fieldnames, saveDir):
 
 if __name__ == "__main__":
     pageData = list()
-    pageNum = 1
+    pageNum = 3500
 
     # Step 1. get Gossiping Data pass through over-18
     url = 'https://www.ptt.cc/bbs/Gossiping/index.html'
@@ -137,6 +137,6 @@ if __name__ == "__main__":
 
     # Step 4. save as csv file
     fieldnames = ['aid', 'push', 'title', 'author', 'ip', 'postTime', 'link', 'content']
-    saveDir = 'Gossiping_100.csv'
+    saveDir = 'Gossiping_3500.csv'
     saveToCSV(pageData, fieldnames, saveDir)
     print("end of the code")

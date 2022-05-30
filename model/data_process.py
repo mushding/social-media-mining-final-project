@@ -7,7 +7,7 @@ from sklearn.model_selection import train_test_split
 
 
 # load user and movie nodes
-def load_node_csv(path, index_col):
+def load_node_csv(path, index_col, sep=',', header=0):
     """Loads csv containing node information
 
     Args:
@@ -17,7 +17,7 @@ def load_node_csv(path, index_col):
     Returns:
         dict: mapping of csv row to node id
     """
-    df = pd.read_csv(path, index_col=index_col)
+    df = pd.read_csv(path, index_col=index_col, sep=sep, header=header)
     mapping = {index: i for i, index in enumerate(df.index.unique())}
     return mapping
 
@@ -43,12 +43,15 @@ def load_edge_csv(path, src_index_col, src_mapping, dst_index_col, dst_mapping, 
     src = [src_mapping[index] for index in df[src_index_col]]
     dst = [dst_mapping[index] for index in df[dst_index_col]]
 
-    tag_mapping = {
-        '噓': 0,
-        '→': 1,
-        '推': 2
-    }
-    tag = [tag_mapping[tag] for tag in df[link_index_col]]
+    # tag_mapping = {
+    #     '噓': 0,
+    #     '→': 1,
+    #     '推': 2
+    # }
+    # tag = [tag_mapping[tag] for tag in df[link_index_col]]
+    # edge_attr = torch.tensor(tag).view(-1, 1).to(torch.long)
+
+    tag = [tag for tag in df[link_index_col]]
     edge_attr = torch.tensor(tag).view(-1, 1).to(torch.long)
 
     edge_index = [[], []]

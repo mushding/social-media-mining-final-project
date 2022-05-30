@@ -18,26 +18,45 @@ parser.add_argument("--batch-size", help="set batch size", type=int, required=Tr
 parser.add_argument("--lr-decay", help="learning rate decay", type=int, required=True)
 parser.add_argument("--K", help="graph's neighbor k", type=int, required=True)
 parser.add_argument("--embedding", help="user item embedding", type=int, required=True)
+parser.add_argument("--lambdas", help="L2 regularization lambda", type=float, required=True)
 args = parser.parse_args()
 
+# <PTT Gossiping>
 # artical_path = '../data/cralwer/Gossiping_20000.csv'
 # comments_path = '../data/cralwer/Gossiping_200_comments.csv'
-artical_path = '../data/crawler/Filtered_Gossiping_20000.csv'
-comments_path = '../data/crawler/Filtered_Gossiping_comments.csv'
+# artical_path = '../data/crawler/Filtered_Gossiping_20000.csv'
+# comments_path = '../data/crawler/Filtered_Duplicate_Gossiping_comments.csv'
 
+# user_mapping = load_node_csv(comments_path, index_col='userid')
+# artical_mapping = load_node_csv(artical_path, index_col='aid')
+# num_users, num_articals = len(user_mapping), len(artical_mapping)
 
-user_mapping = load_node_csv(comments_path, index_col='userid')
-artical_mapping = load_node_csv(artical_path, index_col='aid')
+# edge_index = load_edge_csv(
+#     comments_path,
+#     src_index_col='userid',
+#     src_mapping=user_mapping,
+#     dst_index_col='aid',
+#     dst_mapping=artical_mapping,
+#     link_index_col='tag'
+# )
+
+# <MovieLens>
+movie_path = '../data/movielens_1M/movies.csv'
+rating_path = '../data/movielens_1M/ratings.csv'
+
+user_mapping = load_node_csv(rating_path, index_col='userId')
+artical_mapping = load_node_csv(movie_path, index_col='movieId')
 num_users, num_articals = len(user_mapping), len(artical_mapping)
 
 edge_index = load_edge_csv(
-    comments_path,
-    src_index_col='userid',
+    rating_path,
+    src_index_col='userId',
     src_mapping=user_mapping,
-    dst_index_col='aid',
+    dst_index_col='movieId',
     dst_mapping=artical_mapping,
-    link_index_col='tag'
+    link_index_col='rating'
 )
+
 print("User number: ", len(user_mapping))
 print("Artical number:", len(artical_mapping))
 print("Edge number:", edge_index.size())
@@ -50,12 +69,12 @@ train_sparse_edge_index, val_sparse_edge_index, test_sparse_edge_index = COO2Spa
 contants = {
     "ITERATIONS": args.iteration,
     "BATCH_SIZE": args.batch_size,
-    "LR": 1e-3,
+    "LR": 0.005,
     "ITERS_PER_EVAL": 200,
     "ITERS_PER_LR_DECAY": args.lr_decay,
     "K": args.K,
     "EMBEDDING_DIM": args.embedding,
-    "LAMBDA": 1e-6,
+    "LAMBDA": args.lambdas,
 }
 
 model = LightGCN(num_users, num_articals, embedding_dim=contants["EMBEDDING_DIM"], K=contants["K"])

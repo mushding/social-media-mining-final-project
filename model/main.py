@@ -24,46 +24,51 @@ args = parser.parse_args()
 # <PTT Gossiping>
 # artical_path = '../data/cralwer/Gossiping_20000.csv'
 # comments_path = '../data/cralwer/Gossiping_200_comments.csv'
-# artical_path = '../data/crawler/Filtered_Gossiping_20000.csv'
-# comments_path = '../data/crawler/Filtered_Duplicate_Gossiping_comments.csv'
+artical_path = '../data/crawler/Filtered_Gossiping_20000.csv'
+comments_path = '../data/crawler/Filtered_Duplicate_Gossiping_comments.csv'
 
-# user_mapping = load_node_csv(comments_path, index_col='userid')
-# artical_mapping = load_node_csv(artical_path, index_col='aid')
+user_mapping = load_node_csv(comments_path, index_col='userid')
+artical_mapping = load_node_csv(artical_path, index_col='aid')
+num_users, num_articals = len(user_mapping), len(artical_mapping)
+
+edge_info = load_edge_csv(
+    comments_path,
+    src_index_col='userid',
+    src_mapping=user_mapping,
+    dst_index_col='aid',
+    dst_mapping=artical_mapping,
+    link_index_cols=['tag', 'commentNum']
+)
+
+# <MovieLens>
+# movie_path = '../data/movielens_1M/movies.csv'
+# rating_path = '../data/movielens_1M/ratings.csv'
+
+# user_mapping = load_node_csv(rating_path, index_col='userId')
+# artical_mapping = load_node_csv(movie_path, index_col='movieId')
 # num_users, num_articals = len(user_mapping), len(artical_mapping)
 
 # edge_index = load_edge_csv(
-#     comments_path,
-#     src_index_col='userid',
+#     rating_path,
+#     src_index_col='userId',
 #     src_mapping=user_mapping,
-#     dst_index_col='aid',
+#     dst_index_col='movieId',
 #     dst_mapping=artical_mapping,
-#     link_index_col='tag'
+#     link_index_col='rating'
 # )
-
-# <MovieLens>
-movie_path = '../data/movielens_1M/movies.csv'
-rating_path = '../data/movielens_1M/ratings.csv'
-
-user_mapping = load_node_csv(rating_path, index_col='userId')
-artical_mapping = load_node_csv(movie_path, index_col='movieId')
-num_users, num_articals = len(user_mapping), len(artical_mapping)
-
-edge_index = load_edge_csv(
-    rating_path,
-    src_index_col='userId',
-    src_mapping=user_mapping,
-    dst_index_col='movieId',
-    dst_mapping=artical_mapping,
-    link_index_col='rating'
-)
 
 print("User number: ", len(user_mapping))
 print("Artical number:", len(artical_mapping))
-print("Edge number:", edge_index.size())
+print("Edge number:", edge_info[0].size())
 
-train_edge_index, val_edge_index, test_edge_index = split_dataset(edge_index)
+train_edge_info, val_edge_info, test_edge_info = split_dataset(edge_info)
 train_sparse_edge_index, val_sparse_edge_index, test_sparse_edge_index = COO2SparseTensor(
-    train_edge_index, val_edge_index, test_edge_index, num_users, num_articals)
+    train_edge_info, val_edge_info, test_edge_info, num_users, num_articals)
+
+edge_index, _ = edge_info
+train_edge_index, _ = train_edge_info
+val_edge_index, _ = val_edge_info
+test_edge_index, _ = test_edge_info
 
 # define contants
 contants = {

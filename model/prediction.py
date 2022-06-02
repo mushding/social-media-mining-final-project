@@ -15,7 +15,7 @@ def make_predictions(user_indice, num_recs, num_pred):
     comments_path = '../data/crawler/Filtered_Duplicate_Gossiping_comments.csv'
     # artical_path = '../data/crawler/Gossiping_20000.csv'
     # comments_path = '../data/crawler/Gossiping_20000_comments.csv'
-    model_path = '../save/delete duplicate (20) -> lr-decay 2000'
+    model_path = '../save/item -> 20, user -> 40, (no duplicate) iteration 2000'
 
     print("------------- 1. Load Node Edge... -------------")
     user_mapping = load_node_csv(comments_path, index_col='userid')
@@ -25,18 +25,19 @@ def make_predictions(user_indice, num_recs, num_pred):
     
     num_users, num_articals = len(user_mapping), len(artical_mapping)
 
-    edge_index = load_edge_csv(
+    edge_info = load_edge_csv(
         comments_path,
         src_index_col='userid',
         src_mapping=user_mapping,
         dst_index_col='aid',
         dst_mapping=artical_mapping,
-        link_index_col='tag'
+        link_index_cols=['tag', 'commentNum']
     )
+    edge_index, _ = edge_info
     edge_index = edge_index.to(device)
 
     print("------------- 2. Load Model... -------------")
-    model = LightGCN(num_users, num_articals, 64, 3)
+    model = LightGCN(num_users, num_articals, 512, 3)
     model = model.to(device)
     model.load_state_dict(torch.load(model_path))
     model.eval()
@@ -77,11 +78,11 @@ def make_predictions(user_indice, num_recs, num_pred):
                 f.writelines(f"title: {titles[i]}\n")
             f.writelines("\n")
 
-        print(f"Here are some articals that user {user_id} rated highly")
-        for i in range(len(articals)):
-            print(f"title: {titles[i]}")
+        # print(f"Here are some articals that user {user_id} rated highly")
+        # for i in range(len(articals)):
+        #     print(f"title: {titles[i]}")
 
-        print()
+        # print()
 
         articals = [index.cpu().item() for index in indices if index not in user_pos_items[user]][:num_pred]
         artical_ids = [list(artical_mapping.keys())[list(artical_mapping.values()).index(artical)] for artical in articals]
@@ -93,13 +94,13 @@ def make_predictions(user_indice, num_recs, num_pred):
             for i in range(num_pred):
                 f.writelines(f"title: {titles[i]}\n")
 
-        print(f"Here are some suggested articals for user {user_id}")
-        for i in range(num_pred):
-            print(f"title: {titles[i]}")
+        # print(f"Here are some suggested articals for user {user_id}")
+        # for i in range(num_pred):
+        #     print(f"title: {titles[i]}")
 
 if __name__ == '__main__':
-    USER_IDX = 50
+    USER_IDX = 200
     NUM_RECS = 200
-    NUM_PRED = 15
+    NUM_PRED = 100
 
     make_predictions(USER_IDX, NUM_RECS, NUM_PRED)

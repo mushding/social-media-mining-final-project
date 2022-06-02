@@ -17,7 +17,8 @@ if __name__ == '__main__':
 
     comments_path = '../data/crawler/Filtered_Gossiping_20000_comments.csv'
     save_path = '../data/crawler/Filtered_Gossiping_comments.csv'
-    comments_thred = 20
+
+    comments_thred = 40
 
     df = pd.read_csv(comments_path)
 

@@ -45,8 +45,8 @@ def load_edge_csv(path, src_index_col, src_mapping, dst_index_col, dst_mapping, 
 
     tag_mapping = {
         '噓': 1,
-        '→': 1,
-        '推': 1
+        '→': 2,
+        '推': 4
     }
     tag_header = link_index_cols[0]
     commentNum_header = link_index_cols[1]
@@ -94,6 +94,10 @@ def split_dataset(edge_info):
     val_edge_attr = edge_attr[val_indices]
     test_edge_attr = edge_attr[test_indices]
 
+    print(f"Train: \nIndex: {train_edge_index.shape} \nAttr: {train_edge_attr.shape}")
+    print(f"Val: \nIndex: {val_edge_index.shape} \nAttr: {val_edge_attr.shape}")
+    print(f"Test: \nIndex: {test_edge_index.shape} \nAttr: {test_edge_attr.shape}")
+
     return (train_edge_index, train_edge_attr), \
            (val_edge_index, val_edge_attr),\
            (test_edge_index, test_edge_attr)
@@ -121,9 +125,9 @@ def COO2SparseTensor(train_edge_info, test_edge_info, val_edge_info, num_users, 
     # convert edge indices into Sparse Tensors: https://pytorch-geometric.readthedocs.io/en/latest/notes/sparse_tensor.html
     train_sparse_edge_index = SparseTensor(row=train_edge_index[0], col=train_edge_index[1], value=train_edge_attr, sparse_sizes=(
         num_users + num_articals, num_users + num_articals))
-    val_sparse_edge_index = SparseTensor(row=val_edge_index[0], col=val_edge_index[1], value=test_edge_attr, sparse_sizes=(
+    val_sparse_edge_index = SparseTensor(row=val_edge_index[0], col=val_edge_index[1], value=val_edge_attr, sparse_sizes=(
         num_users + num_articals, num_users + num_articals))
-    test_sparse_edge_index = SparseTensor(row=test_edge_index[0], col=test_edge_index[1], value=val_edge_attr, sparse_sizes=(
+    test_sparse_edge_index = SparseTensor(row=test_edge_index[0], col=test_edge_index[1], value=test_edge_attr, sparse_sizes=(
         num_users + num_articals, num_users + num_articals))
 
     # train_sparse_edge_index = SparseTensor(row=train_edge_index[0], col=train_edge_index[1], sparse_sizes=(
